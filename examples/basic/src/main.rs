@@ -20,8 +20,8 @@ fn play_audio(audio: AudioAssets) {
 
 fn main() {
     // Use specific assets directly
-    process_asset(UiAssets::logo_png);
-    process_asset(AudioAssets::sound_ogg);
+    process_asset(UiAssets::LogoPng);
+    process_asset(AudioAssets::SoundOgg);
 
     // Find an asset by path
     if let Some(config) = ConfigAssets::find_by_path("settings.json") {

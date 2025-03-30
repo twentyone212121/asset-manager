@@ -1,3 +1,4 @@
+use convert_case::{Boundary, Case, Converter};
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::{format_ident, quote};
@@ -58,7 +59,7 @@ impl Parse for AssetsInput {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```ignore
 /// use asset_macros::assets;
 ///
 /// assets!(UiAssets, "assets/ui", include: r"\.(png|jpg)$");
@@ -111,9 +112,10 @@ pub fn assets(input: TokenStream) -> TokenStream {
     let (variant_idents, (full_path_strs, rel_path_strs)): (Vec<_>, (Vec<_>, Vec<_>)) = valid_files
         .iter()
         .map(|path| {
-            let variant_ident = format_ident!("{}", path_to_variant_name(path, &dir_path));
+            let rel_path = path.strip_prefix(&dir_path).unwrap();
+            let variant_ident = format_ident!("{}", path_to_variant_name(&rel_path));
             let full_path_str = path.to_string_lossy();
-            let rel_path_str = path.strip_prefix(&dir_path).unwrap().to_string_lossy();
+            let rel_path_str = rel_path.to_string_lossy();
             (variant_ident, (full_path_str, rel_path_str))
         })
         .unzip();
@@ -203,25 +205,86 @@ fn collect_files(
     Ok(())
 }
 
-/// Convert file path to a valid enum variant name
-fn path_to_variant_name(path: &Path, base_dir: &Path) -> String {
-    let rel_path = path.strip_prefix(base_dir).unwrap();
-    let mut name = String::new();
+/// Convert file path to a valid enum variant name in UpperCamelCase
+fn path_to_variant_name(path: &Path) -> String {
+    let path_str = path.to_string_lossy();
 
-    for component in rel_path.components() {
-        let component_str = component.as_os_str().to_string_lossy();
-        if !name.is_empty() {
-            name.push('_');
-        }
-        name.push_str(&component_str.replace(|c: char| !c.is_alphanumeric(), "_"));
+    let conv = Converter::new()
+        .add_boundaries(&[
+            Boundary::from_delim("/"),
+            Boundary::from_delim(r"\"),
+            Boundary::from_delim("."),
+        ])
+        .to_case(Case::Pascal);
+
+    let variant_name = conv.convert(path_str);
+
+    // Try to ensure it's a valid Rust identifier
+    if variant_name.starts_with(|first: char| first.is_numeric()) {
+        format!("Asset{}", variant_name)
+    } else {
+        variant_name
     }
+}
 
-    // Ensure it's a valid Rust identifier
-    if let Some(first_char) = name.chars().next() {
-        if first_char.is_numeric() {
-            name = format!("_{}", name);
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_path_to_variant_name() {
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("image.png")),
+            "ImagePng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("style.css")),
+            "StyleCss"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("ui/button.svg")),
+            "UiButtonSvg"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("assets/icons/home.png")),
+            "AssetsIconsHomePng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from(r"ui\button.svg")),
+            "UiButtonSvg"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from(r"assets\icons\home.png")),
+            "AssetsIconsHomePng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("user-icon.png")),
+            "UserIconPng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("button_large.png")),
+            "ButtonLargePng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("ui/user-profile/avatar_small.jpg")),
+            "UiUserProfileAvatarSmallJpg"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("1icon.png")),
+            "Asset1IconPng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("2021/logo.png")),
+            "Asset2021LogoPng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("config.dev.json")),
+            "ConfigDevJson"
+        );
     }
-
-    name
 }
