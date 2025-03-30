@@ -1,0 +1,16 @@
+[package]
+name = "asset-macros"
+version = "0.1.0"
+edition = "2024"
+description = "Procedural macros for embedding assets in Rust binaries"
+license = "MIT"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0"
+syn = { version = "2.0", features = ["full"] }
+proc-macro2 = "1.0"
+regex = "1.9"
+asset-traits = { version = "0.1.0", path = "../asset-traits" }

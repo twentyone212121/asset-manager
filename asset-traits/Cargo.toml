@@ -1,0 +1,6 @@
+[package]
+name = "asset-traits"
+version = "0.1.0"
+edition = "2024"
+description = "Traits for working with compiled assets"
+license = "MIT"

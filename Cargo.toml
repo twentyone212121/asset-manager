@@ -1,0 +1,3 @@
+[workspace]
+members = ["asset-traits", "asset-macros", "examples/*"]
+resolver = "3"
