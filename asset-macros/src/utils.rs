@@ -1,0 +1,130 @@
+use convert_case::{Boundary, Case, Converter};
+use regex::Regex;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+/// Helper function to collect files recursively while applying filters
+pub fn collect_files(
+    dir: &Path,
+    files: &mut Vec<PathBuf>,
+    include_regex: &Option<Regex>,
+    ignore_regex: &Option<Regex>,
+) -> std::io::Result<()> {
+    if !dir.exists() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Directory not found: {}", dir.display()),
+        ));
+    }
+
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        let path_str = path.to_string_lossy();
+
+        if ignore_regex
+            .as_ref()
+            .is_some_and(|regex| regex.is_match(&path_str))
+        {
+            continue;
+        }
+
+        if path.is_dir() {
+            collect_files(&path, files, include_regex, ignore_regex)?;
+        } else {
+            if include_regex
+                .as_ref()
+                .is_none_or(|regex| regex.is_match(&path_str))
+            {
+                files.push(path);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+/// Convert file path to a valid enum variant name in UpperCamelCase
+pub fn path_to_variant_name(path: &Path) -> String {
+    let path_str = path.to_string_lossy();
+
+    let conv = Converter::new()
+        .add_boundaries(&[
+            Boundary::from_delim("/"),
+            Boundary::from_delim(r"\"),
+            Boundary::from_delim("."),
+        ])
+        .to_case(Case::Pascal);
+
+    let variant_name = conv.convert(path_str);
+
+    // Try to ensure it's a valid Rust identifier
+    if variant_name.starts_with(|first: char| first.is_numeric()) {
+        format!("Asset{}", variant_name)
+    } else {
+        variant_name
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_path_to_variant_name() {
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("image.png")),
+            "ImagePng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("style.css")),
+            "StyleCss"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("ui/button.svg")),
+            "UiButtonSvg"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("assets/icons/home.png")),
+            "AssetsIconsHomePng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from(r"ui\button.svg")),
+            "UiButtonSvg"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from(r"assets\icons\home.png")),
+            "AssetsIconsHomePng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("user-icon.png")),
+            "UserIconPng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("button_large.png")),
+            "ButtonLargePng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("ui/user-profile/avatar_small.jpg")),
+            "UiUserProfileAvatarSmallJpg"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("1icon.png")),
+            "Asset1IconPng"
+        );
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("2021/logo.png")),
+            "Asset2021LogoPng"
+        );
+
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("config.dev.json")),
+            "ConfigDevJson"
+        );
+    }
+}
