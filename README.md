@@ -4,7 +4,7 @@ A compile-time static asset manager that embeds files directly into your Rust bi
 
 > [!WARNING]
 > Currently, the project's source code can be found at the `dev` branch.
-> 
+>
 > It will be merged into `main` when the project is approved as a Capstone Project for Rustcamp Winter 2025.
 >
 > To review it, please go to the open PR.
@@ -24,8 +24,8 @@ use asset_traits::{Asset, AssetCollection};
 
 assets!(UiAssets, "assets/ui", include: r"\.(png|jpg|svg)$");
 
-let logo_bytes = UiAssets::logo_png.bytes();
-let logo_path = UiAssets::logo_png.path();
+let logo_bytes = UiAssets::LogoPng.bytes();
+let logo_path = UiAssets::LogoPng.path();
 
 for asset in UiAssets::all() {
     println!("UI asset: {} ({} bytes)", asset.path(), asset.bytes().len());
