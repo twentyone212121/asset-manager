@@ -72,7 +72,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_path_to_variant_name() {
+    fn test_basic_file_paths() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from("image.png")),
             "ImagePng"
@@ -81,7 +81,10 @@ mod tests {
             path_to_variant_name(&PathBuf::from("style.css")),
             "StyleCss"
         );
+    }
 
+    #[test]
+    fn test_nested_paths() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from("ui/button.svg")),
             "UiButtonSvg"
@@ -90,7 +93,10 @@ mod tests {
             path_to_variant_name(&PathBuf::from("assets/icons/home.png")),
             "AssetsIconsHomePng"
         );
+    }
 
+    #[test]
+    fn test_windows_path_separators() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from(r"ui\button.svg")),
             "UiButtonSvg"
@@ -99,20 +105,30 @@ mod tests {
             path_to_variant_name(&PathBuf::from(r"assets\icons\home.png")),
             "AssetsIconsHomePng"
         );
+    }
 
+    #[test]
+    fn test_paths_with_hyphens() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from("user-icon.png")),
             "UserIconPng"
         );
         assert_eq!(
-            path_to_variant_name(&PathBuf::from("button_large.png")),
-            "ButtonLargePng"
-        );
-        assert_eq!(
             path_to_variant_name(&PathBuf::from("ui/user-profile/avatar_small.jpg")),
             "UiUserProfileAvatarSmallJpg"
         );
+    }
 
+    #[test]
+    fn test_paths_with_underscores() {
+        assert_eq!(
+            path_to_variant_name(&PathBuf::from("button_large.png")),
+            "ButtonLargePng"
+        );
+    }
+
+    #[test]
+    fn test_paths_starting_with_numbers() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from("1icon.png")),
             "Asset1IconPng"
@@ -121,7 +137,10 @@ mod tests {
             path_to_variant_name(&PathBuf::from("2021/logo.png")),
             "Asset2021LogoPng"
         );
+    }
 
+    #[test]
+    fn test_paths_with_multiple_dots() {
         assert_eq!(
             path_to_variant_name(&PathBuf::from("config.dev.json")),
             "ConfigDevJson"
