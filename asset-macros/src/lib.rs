@@ -19,7 +19,7 @@ use syn::parse_macro_input;
 ///
 /// # Syntax
 ///
-/// ```
+/// ```ignore
 /// assets!(EnumName, "directory/path"[, include: "regex_pattern"][, ignore: "regex_pattern"]);
 /// ```
 ///

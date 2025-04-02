@@ -46,8 +46,8 @@ pub(crate) fn collect_files(
 }
 
 /// Convert file path to a valid enum variant name in UpperCamelCase
-pub(crate) fn path_to_variant_name(path: &Path) -> String {
-    let path_str = path.to_string_lossy();
+pub(crate) fn path_to_variant_name<P: AsRef<Path>>(path: P) -> String {
+    let path_str = path.as_ref().to_string_lossy();
 
     let conv = Converter::new()
         .add_boundaries(&[
@@ -73,77 +73,50 @@ mod tests {
 
     #[test]
     fn test_basic_file_paths() {
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("image.png")),
-            "ImagePng"
-        );
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("style.css")),
-            "StyleCss"
-        );
+        assert_eq!(path_to_variant_name("image.png"), "ImagePng");
+        assert_eq!(path_to_variant_name("style.css"), "StyleCss");
     }
 
     #[test]
     fn test_nested_paths() {
+        assert_eq!(path_to_variant_name("ui/button.svg"), "UiButtonSvg");
         assert_eq!(
-            path_to_variant_name(&PathBuf::from("ui/button.svg")),
-            "UiButtonSvg"
-        );
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("assets/icons/home.png")),
+            path_to_variant_name("assets/icons/home.png"),
             "AssetsIconsHomePng"
         );
     }
 
     #[test]
     fn test_windows_path_separators() {
+        assert_eq!(path_to_variant_name(r"ui\button.svg"), "UiButtonSvg");
         assert_eq!(
-            path_to_variant_name(&PathBuf::from(r"ui\button.svg")),
-            "UiButtonSvg"
-        );
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from(r"assets\icons\home.png")),
+            path_to_variant_name(r"assets\icons\home.png"),
             "AssetsIconsHomePng"
         );
     }
 
     #[test]
     fn test_paths_with_hyphens() {
+        assert_eq!(path_to_variant_name("user-icon.png"), "UserIconPng");
         assert_eq!(
-            path_to_variant_name(&PathBuf::from("user-icon.png")),
-            "UserIconPng"
-        );
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("ui/user-profile/avatar_small.jpg")),
+            path_to_variant_name("ui/user-profile/avatar_small.jpg"),
             "UiUserProfileAvatarSmallJpg"
         );
     }
 
     #[test]
     fn test_paths_with_underscores() {
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("button_large.png")),
-            "ButtonLargePng"
-        );
+        assert_eq!(path_to_variant_name("button_large.png"), "ButtonLargePng");
     }
 
     #[test]
     fn test_paths_starting_with_numbers() {
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("1icon.png")),
-            "Asset1IconPng"
-        );
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("2021/logo.png")),
-            "Asset2021LogoPng"
-        );
+        assert_eq!(path_to_variant_name("1icon.png"), "Asset1IconPng");
+        assert_eq!(path_to_variant_name("2021/logo.png"), "Asset2021LogoPng");
     }
 
     #[test]
     fn test_paths_with_multiple_dots() {
-        assert_eq!(
-            path_to_variant_name(&PathBuf::from("config.dev.json")),
-            "ConfigDevJson"
-        );
+        assert_eq!(path_to_variant_name("config.dev.json"), "ConfigDevJson");
     }
 }
