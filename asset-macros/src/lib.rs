@@ -10,6 +10,19 @@ use syn::parse_macro_input;
 
 /// A macro that generates an enum containing all assets in a directory.
 ///
+/// # Parameters
+///
+/// * `enum_name` - Required. The identifier for the generated enum.
+/// * `dir_path` - Required. A string literal specifying the directory path to scan for assets.
+/// * `include` - Optional. A regex pattern string literal specifying which files to include.
+/// * `ignore` - Optional. A regex pattern string literal specifying which files to ignore.
+///
+/// # Syntax
+///
+/// ```
+/// assets!(EnumName, "directory/path"[, include: "regex_pattern"][, ignore: "regex_pattern"]);
+/// ```
+///
 /// # Example
 ///
 /// ```ignore
@@ -17,6 +30,8 @@ use syn::parse_macro_input;
 ///
 /// assets!(UiAssets, "assets/ui", include: r"\.(png|jpg)$");
 /// ```
+///
+/// This will generate an enum `UiAssets` with variants for each PNG and JPG file in the "assets/ui" directory.
 #[proc_macro]
 pub fn assets(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as AssetsInput);
