@@ -7,15 +7,15 @@ use syn::Ident;
 use crate::parse::AssetsInput;
 use crate::utils::{collect_files, path_to_variant_name};
 
-pub struct AssetEnum {
-    pub enum_name: Ident,
-    pub entries: Vec<AssetEntry>,
+pub(crate) struct AssetEnum {
+    enum_name: Ident,
+    entries: Vec<AssetEntry>,
 }
 
-pub struct AssetEntry {
-    pub variant_ident: Ident,
-    pub full_path: String,
-    pub rel_path: String,
+pub(crate) struct AssetEntry {
+    variant_ident: Ident,
+    full_path: String,
+    rel_path: String,
 }
 
 impl TryFrom<AssetsInput> for AssetEnum {

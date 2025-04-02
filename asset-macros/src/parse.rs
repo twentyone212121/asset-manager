@@ -1,11 +1,11 @@
 use syn::{Ident, LitStr, Token, parse::Parse, parse::ParseStream};
 
 /// Input parameters for the `assets!` macro.
-pub struct AssetsInput {
-    pub enum_name: Ident,
-    pub dir_path_lit: LitStr,
-    pub include_pattern_lit: Option<LitStr>,
-    pub ignore_pattern_lit: Option<LitStr>,
+pub(crate) struct AssetsInput {
+    pub(crate) enum_name: Ident,
+    pub(crate) dir_path_lit: LitStr,
+    pub(crate) include_pattern_lit: Option<LitStr>,
+    pub(crate) ignore_pattern_lit: Option<LitStr>,
 }
 
 impl Parse for AssetsInput {

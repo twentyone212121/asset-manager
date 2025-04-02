@@ -4,7 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 /// Helper function to collect files recursively while applying filters
-pub fn collect_files(
+pub(crate) fn collect_files(
     dir: &Path,
     files: &mut Vec<PathBuf>,
     include_regex: &Option<Regex>,
@@ -46,7 +46,7 @@ pub fn collect_files(
 }
 
 /// Convert file path to a valid enum variant name in UpperCamelCase
-pub fn path_to_variant_name(path: &Path) -> String {
+pub(crate) fn path_to_variant_name(path: &Path) -> String {
     let path_str = path.to_string_lossy();
 
     let conv = Converter::new()
