@@ -2,13 +2,6 @@
 
 A compile-time static asset manager that embeds files directly into your Rust binary while providing a convenient API to access them.
 
-> [!WARNING]
-> Currently, the project's source code can be found at the `dev` branch.
->
-> It will be merged into `main` when the project is approved as a Capstone Project for Rustcamp Winter 2025.
->
-> To review it, please go to the open PR.
-
 ## Features
 
 - **Compile-time embedding**: all assets are embedded in the binary at compile time
